@@ -41,7 +41,7 @@ from vit_model import MyViT  # Assuming you have the ViT model class in a file `
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=True, help="path to the input image")
-ap.add_argument("-s", "--size", type=str, default="(200, 150)", help="ROI size (in pixels)")
+ap.add_argument("-s", "--size", type=str, default="(32, 32)", help="ROI size (in pixels)")
 ap.add_argument("-c", "--min-conf", type=float, default=0.9, help="minimum probability to filter weak detections")
 ap.add_argument("-v", "--visualize", type=int, default=-1, help="whether or not to show extra visualizations for debugging")
 args = vars(ap.parse_args())
