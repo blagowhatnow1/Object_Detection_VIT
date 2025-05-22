@@ -2,8 +2,9 @@
 #This code is under progress, is highly experimental and might contain bugs.
 #Will need further review.
 #Adapted from https://pyimagesearch.com/2020/06/22/turning-any-cnn-image-classifier-into-an-object-detector-with-keras-tensorflow-and-opencv/
-
 # import the necessary packages
+from vit_model import MyViT  # Assuming you have the ViT model class in a file `vit_model.py`
+import json
 import torch
 import numpy as np
 import argparse
@@ -37,16 +38,19 @@ def image_pyramid(image, scale=1.5, minSize=(32, 32)):
         # yield the next image in the pyramid
         yield image
 
-# Your ViT model class (make sure it is correctly defined/imported)
-from vit_model import MyViT  # Assuming you have the ViT model class in a file `vit_model.py`
-
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=True, help="path to the input image")
+ap.add_argument("-p", "--pretrain_path", required=True, help="path to pretrained model")  # Renamed
 ap.add_argument("-s", "--size", type=str, default="(32, 32)", help="ROI size (in pixels)")
 ap.add_argument("-c", "--min-conf", type=float, default=0.9, help="minimum probability to filter weak detections")
 ap.add_argument("-v", "--visualize", type=int, default=-1, help="whether or not to show extra visualizations for debugging")
+ap.add_argument("-l", "--class_labels", type=int, default=-1, help="Pass in as JSON")
 args = vars(ap.parse_args())
+
+# Load class names from the provided JSON file
+with open(args["class_labels"], 'r') as f:
+    class_names = json.load(f)
 
 # initialize variables used for the object detection procedure
 WIDTH = 400
@@ -59,7 +63,7 @@ INPUT_SIZE = (32, 32)  # Resize to 32x32 for ViT model input
 print("[INFO] loading Vision Transformer model...")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 vit_model = MyViT(chw=(3, 32, 32), n_patches=7, n_blocks=2, hidden_d=128, n_heads=8, out_d=10)  # Your ViT model
-vit_model.load_state_dict(torch.load('vit_cifar10_finetuned.pth'))
+vit_model.load_state_dict(torch.load(args["pretrain_path"]))  # Use args["pretrain_path"]
 vit_model.to(device)
 vit_model.eval()
 
@@ -73,6 +77,7 @@ transform = transforms.Compose([
 
 # load the input image from disk, resize it such that it has the supplied width, and then grab its dimensions
 orig = cv2.imread(args["image"])
+orig = cv2.cvtColor(orig, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
 orig = imutils.resize(orig, width=WIDTH)
 (H, W) = orig.shape[:2]
 
