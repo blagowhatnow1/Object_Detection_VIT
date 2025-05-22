@@ -45,7 +45,7 @@ ap.add_argument("-p", "--pretrain_path", required=True, help="path to pretrained
 ap.add_argument("-s", "--size", type=str, default="(32, 32)", help="ROI size (in pixels)")
 ap.add_argument("-c", "--min-conf", type=float, default=0.9, help="minimum probability to filter weak detections")
 ap.add_argument("-v", "--visualize", type=int, default=-1, help="whether or not to show extra visualizations for debugging")
-ap.add_argument("-l", "--class_labels", type=int, default=-1, help="Pass in as JSON")
+ap.add_argument("-l", "--class_labels", type=str, default=-1, help="Pass in as JSON")
 args = vars(ap.parse_args())
 
 # Load class names from the provided JSON file
